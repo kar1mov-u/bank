@@ -1,5 +1,5 @@
 import sqlite3
-
+import models
 '''
 
 conn=sqlite3.connect('bank.db')
@@ -26,6 +26,33 @@ class Dbase:
     
     def add_user(self,fullname,username,password,email,created_at):
         self.c.execute("INSERT INTO users(full_name,username,password,email,created_at) VALUES(?,?,?,?,?)", (fullname,username,password,email,created_at))
+        self.conn.commit()
+
+
+
+
+
+
+
+
+    
+    
+    def get_user_data(self,username,pas):
+        try:
+            self.c.execute("SELECT * FROM users WHERE username =?", (username,))
+            data = self.c.fetchone()
+            if data:
+                pass_hash = data[3]
+                if models.pas_check(pas,pass_hash):
+                    print(data)
+                else:
+                    print('Invalid password or username')
+            else:
+                print('Invalid password or username')
+        except sqlite3.Error as e:
+            print(f'Database error in  get_user_data: {e}')
+
+
     def close(self):
         self.conn.commit()
         self.conn.close()
