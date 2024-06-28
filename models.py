@@ -10,12 +10,18 @@ class Users:
         self.created_at=datetime.now().date()
     
 # Getting a password from a user for 1st time
-def password_first():
-    pas=''
-    pas2=''
-    while len(pas)<8:
-        pas=input('Enter a password')
+def get_pass():
+    pass1 = input('Enter a password: ')
+    mess = ''
+    while True:
+        pass2=input(mess + 'Enter password again :')  
+        if pass2==pass1:
+            break
+        else:
+            mess='Wrong !!!'
+    return pass1
 
-    while pas!=pas2:
-        pas2=input('Enter a password')
-    return pas
+def pas_check(plaintext, hashed):
+    return bcrypt.checkpw(plaintext.encode('utf-8'), hashed)
+
+
