@@ -1,6 +1,40 @@
 from datetime import datetime
 import bcrypt 
 import database
+
+
+class Bank:
+    def __init__(self) -> None:
+        self.login_stat = None
+
+    def create_account(self):
+        create_acc()
+
+    def login(self):
+        data=log()
+        if data:
+            self.login_stat = data
+
+
+
+
+
+    def is_login(self):
+        return self.login_stat is not None
+    
+    def display_info(self):
+        if not self.is_login():
+            print("You have'nt logged in !!")
+        else:
+            print(f'Full-name : {self.login_stat[1]}')
+            print(f'Username : {self.login_stat[2]}')
+            print(f' Email : {self.login_stat[4]}')
+            print(f'Created-at : {self.login_stat[5]}')
+    def logout(self):
+        self.is_login = None
+        print('Successfully logged out')
+
+
 class Users:
     def __init__(self,full_name,username,password,email) -> None:
         self.full_name = full_name
@@ -9,6 +43,7 @@ class Users:
         salt = bcrypt.gensalt()
         self.password= bcrypt.hashpw(password.encode('utf-8'),salt)
         self.created_at=datetime.now().date()
+    
     
 # Getting a password from a user for 1st time
 def get_pass():
@@ -42,10 +77,10 @@ def create_acc():
     # Adding info of the user to the database
     db.add_user(user.full_name,user.username,user.password,user.email,user.created_at)
     db.close()
-    print('You have successfully created account')          
+    print(f'You have successfully created account : {user.username}')          
 
 
-def login():
+def log():
     db = database.Dbase()
     print('Enter followinf credentials to login your account')
     uname = input('Enter your username : ')
@@ -57,3 +92,7 @@ def login():
         print(f'Username : {data[2]}')
         print(f'Email : {data[4]}')
         print(f'Created-at: {data[5]}')
+        return data
+    else:
+        print('Failed to log in ')
+        return False
