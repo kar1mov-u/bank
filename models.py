@@ -13,15 +13,30 @@ class Bank:
     def login(self):
         data=log()
         if data:
-            self.login_stat = data
-
-
-
-
+            self.login_stat = data        
 
     def is_login(self):
         return self.login_stat is not None
     
+    def add_bank_card(self):
+        if not self.is_login():
+            print("You have'nt logged in !!")
+        else:
+            user_id = self.login_stat[0]
+            db = database.Dbase()
+            db.add_card(user_id)
+            db.close()
+
+    def balance_show(self):
+        if not self.is_login():
+            print("You have'nt logged in !!")
+        else:
+            user_id = self.login_stat[0]
+            db = database.Dbase()
+            db.balance_check(user_id)
+            db.close()
+
+
     def display_info(self):
         if not self.is_login():
             print("You have'nt logged in !!")
