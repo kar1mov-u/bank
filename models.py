@@ -19,7 +19,7 @@ class Bank:
         return self.login_stat is not None
     
     def add_bank_card(self):
-        if not self.is_login():
+        if self.login_stat is None:
             print("You have'nt logged in !!")
         else:
             user_id = self.login_stat[0]
@@ -28,7 +28,7 @@ class Bank:
             db.close()
 
     def balance_show(self):
-        if not self.is_login():
+        if self.login_stat is None:
             print("You have'nt logged in !!")
         else:
             user_id = self.login_stat[0]
@@ -38,7 +38,7 @@ class Bank:
 
 
     def display_info(self):
-        if not self.is_login():
+        if self.login_stat is None:
             print("You have'nt logged in !!")
         else:
             print(f'Full-name : {self.login_stat[1]}')
@@ -46,7 +46,7 @@ class Bank:
             print(f' Email : {self.login_stat[4]}')
             print(f'Created-at : {self.login_stat[5]}')
     def logout(self):
-        self.is_login = None
+        self.login_stat = None
         print('Successfully logged out')
 
 

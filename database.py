@@ -25,6 +25,23 @@ c.execute("""
         FOREIGN KEY (user_id) REFERENCES customers(user_id)
     )
 """)
+
+
+c.execute("""
+    CREATE TABLE IF NOT EXISTS transactions (
+        transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sender_id INTEGER NOT NULL,
+        recipient_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        status TEXT,
+        description TEXT,
+        FOREIGN KEY (sender_id) REFERENCES customers(user_id),
+        FOREIGN KEY (recipient_id) REFERENCES customers(user_id)
+    )
+""")
+
+
 conn.commit()
 conn.close()
 
@@ -113,7 +130,32 @@ class Dbase:
                 print('You do not have any cards')
         except sqlite3.Error as e:
             print(f'Database error : {e}')
+    
+
+    # Getting card number details from database to transfer money
+    def get_card(self):
+        try:
+            card = input('Enter recivers card number :')
+            self.c.execute("SELECT * FROM bank_cards WHERE card_number=?",(card,))
+            data = self.c.fetchone()
+            if data:
+                self.c.execute("SELECT full_name,username FROM customers WHERE user_id =?",(data[1],))
+                name = self.c.fetchone()
+                print(f'Infotmation about Card number : {card}')
+                print('--------------------------------')
+                print(f'Owners fullname : {name[0]} |  Username : {name[1]}')
+            else:
+                print(f"There is no card with number : {card}")
+        except sqlite3.Error as e:
+            print(f'Database error : {e}')
+        
+    def trasnfer(self):
+        pass
 
     def close(self):
         self.conn.commit()
         self.conn.close()
+
+if __name__ == "__main__":
+    db = Dbase()
+    db.get_card()
