@@ -107,7 +107,12 @@ class Dbase:
 
 
     def add_card(self,uid):
-        card_num = input('Enter your card number')
+        while True:
+            card_num = input('Enter your card number')
+            if len(card_num)!=16:
+                print("Card number needs to be 16 digit number")
+            else:
+                break
         balance = input('Enter a balance : ')
         if card_num and balance:
             try:
@@ -124,18 +129,20 @@ class Dbase:
             data = self.c.fetchall()
             if data:
                 for i in data:
+                    print('Your balance:')
                     print(f'CARD : {i[0]}  |   Balance : {i[1]}')
                     print('---------------------------------')
+                return data
             else:
                 print('You do not have any cards')
+                return False
         except sqlite3.Error as e:
             print(f'Database error : {e}')
     
 
     # Getting card number details from database to transfer money
-    def get_card(self):
+    def get_card(self,card):
         try:
-            card = input('Enter recivers card number :')
             self.c.execute("SELECT * FROM bank_cards WHERE card_number=?",(card,))
             data = self.c.fetchone()
             if data:
@@ -144,13 +151,55 @@ class Dbase:
                 print(f'Infotmation about Card number : {card}')
                 print('--------------------------------')
                 print(f'Owners fullname : {name[0]} |  Username : {name[1]}')
+                return name
             else:
                 print(f"There is no card with number : {card}")
+                return False
         except sqlite3.Error as e:
             print(f'Database error : {e}')
         
-    def trasnfer(self):
-        pass
+    def trasnfer(self,uid):
+        data = self.balance_check(uid)
+        if not data:
+            quit()
+        money = data[0][1]
+
+        while True:
+            card_number = input('Enter a card number for transfer : ')
+            check = self.get_card(card_number)
+            if data[0][0]== card_number:
+                print('You cannot transfer money for yourself !!')
+                quit()
+            if not check:
+                c=input('You want to continue : Y/N').lower()
+                if c =='y':
+                    continue
+                else:
+                    quit()
+            com = input('Type Y for continue, N for repaeat , Q for discard operation').lower()
+            if com == 'y':
+                print("Let's continue the process")
+                break
+            elif com == 'q':
+                print("Canelling operation")
+                quit()
+        while True:
+            amount = input('Enter amount of money to transfer (q for discard operation)')
+            if amount =='q':
+                quit()
+            if int(amount) < int(money[:-1]):
+                break
+            else:
+                print('You balance is not enough !!')
+        
+        print(f'''
+            Transection details:
+            Trabsferring to : {card_number}
+            Owner of card : {check[0]}
+            Amount : {amount}$
+        ''')
+
+
 
     def close(self):
         self.conn.commit()
@@ -158,4 +207,5 @@ class Dbase:
 
 if __name__ == "__main__":
     db = Dbase()
-    db.get_card()
+    db.trasnfer(1)
+    db.close()

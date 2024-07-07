@@ -37,6 +37,16 @@ class Bank:
             db.close()
 
 
+    def transfer_money(self):
+        if self.login_stat is None:
+            print("You have'nt logged in !!")
+        else:
+            user_id = self.login_stat[0]
+            db = database.Dbase()
+            db.trasnfer(user_id)
+            db.close()
+
+
     def display_info(self):
         if self.login_stat is None:
             print("You have'nt logged in !!")
