@@ -151,26 +151,30 @@ class Dbase:
                 print(f'Infotmation about Card number : {card}')
                 print('--------------------------------')
                 print(f'Owners fullname : {name[0]} |  Username : {name[1]}')
-                return name
+                return name,data
             else:
                 print(f"There is no card with number : {card}")
                 return False
         except sqlite3.Error as e:
             print(f'Database error : {e}')
         
+
     def trasnfer(self,uid):
         data = self.balance_check(uid)
         if not data:
             quit()
         money = data[0][1]
+        s_card = data[0][0]
+
 
         while True:
-            card_number = input('Enter a card number for transfer : ')
-            check = self.get_card(card_number)
-            if data[0][0]== card_number:
+            r_card = input('Enter a card number for transfer : ')
+            r_name,r_info = self.get_card(r_card)
+
+            if s_card== r_card:
                 print('You cannot transfer money for yourself !!')
                 quit()
-            if not check:
+            if not r_name and r_info:
                 c=input('You want to continue : Y/N').lower()
                 if c =='y':
                     continue
@@ -183,24 +187,34 @@ class Dbase:
             elif com == 'q':
                 print("Canelling operation")
                 quit()
+        r_balance = r_info[3][:-1]
+        r_uid = r_info[1]
+        r_cid = r_info[0]
         while True:
             amount = input('Enter amount of money to transfer (q for discard operation)')
             if amount =='q':
                 quit()
             if int(amount) < int(money[:-1]):
+                mes = input('Enter message for reciever')
                 break
             else:
                 print('You balance is not enough !!')
         
         print(f'''
             Transection details:
-            Trabsferring to : {card_number}
-            Owner of card : {check[0]}
+            Trabsferring to : {r_card}
+            Owner of card : {r_name[0]}
             Amount : {amount}$
         ''')
+        new_r_balance = int(r_balance) + int(amount)
+        new_s_balance = int(money[:-1]) - int(amount)
+        
 
-
-
+        self.c.execute("INSERT INTO transactions(sender_id,recipient_id,amount,description,status) VALUES(?,?,?,?,?)", (uid,r_uid,amount,mes,'succesfull',))
+        self.c.execute("UPDATE bank_cards SET balance = ? WHERE user_id = ?", (new_r_balance,r_uid))
+        self.c.execute("UPDATE bank_cards SET balance = ? WHERE user_id = ?", (new_s_balance,uid))
+        print('Operation was successfull!!')
+                       
     def close(self):
         self.conn.commit()
         self.conn.close()
