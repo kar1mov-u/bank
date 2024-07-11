@@ -45,7 +45,15 @@ class Bank:
             db = database.Dbase()
             db.trasnfer(user_id)
             db.close()
-
+    
+    def transfers_history(self):
+        if self.login_stat is None:
+            print("You have'nt logged in !!")
+        else:
+            user_id = self.login_stat[0]
+            db = database.Dbase()
+            db.transfer_history(user_id)
+            db.close()
 
     def display_info(self):
         if self.login_stat is None:
@@ -55,6 +63,7 @@ class Bank:
             print(f'Username : {self.login_stat[2]}')
             print(f' Email : {self.login_stat[4]}')
             print(f'Created-at : {self.login_stat[5]}')
+
     def logout(self):
         self.login_stat = None
         print('Successfully logged out')

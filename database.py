@@ -59,8 +59,10 @@ class Dbase:
             self.conn.commit()
         except sqlite3.Error as e:
             print(f'Database Error : {e}')
-
-
+    def get_name(self,uid):
+        self.c.execute("SELECT full_name FROM customers WHERE user_id = ?", (uid,))
+        data = self.c.fetchone()
+        return data
 
     #Checks if provided  username or email is UNIQUE,else makes sure to get unique both of them
     def check_exists(self,uname=True):
@@ -154,27 +156,29 @@ class Dbase:
                 return name,data
             else:
                 print(f"There is no card with number : {card}")
-                return False
+                return False,False
         except sqlite3.Error as e:
             print(f'Database error : {e}')
         
 
     def trasnfer(self,uid):
+        # Checking balance of sender and getting info about senders card
         data = self.balance_check(uid)
         if not data:
             quit()
         money = data[0][1]
         s_card = data[0][0]
 
-
+        #Getting recievers card number 
         while True:
             r_card = input('Enter a card number for transfer : ')
+            #Info about recievers card and itself
             r_name,r_info = self.get_card(r_card)
 
             if s_card== r_card:
                 print('You cannot transfer money for yourself !!')
                 quit()
-            if not r_name and r_info:
+            if not r_name or not r_info:
                 c=input('You want to continue : Y/N').lower()
                 if c =='y':
                     continue
@@ -187,14 +191,16 @@ class Dbase:
             elif com == 'q':
                 print("Canelling operation")
                 quit()
-        r_balance = r_info[3][:-1]
+
+        r_balance = r_info[3]
         r_uid = r_info[1]
-        r_cid = r_info[0]
+
+        # Checking if senders balance is bigger than transfer amount
         while True:
             amount = input('Enter amount of money to transfer (q for discard operation)')
             if amount =='q':
                 quit()
-            if int(amount) < int(money[:-1]):
+            if int(amount) < int(money):
                 mes = input('Enter message for reciever')
                 break
             else:
@@ -207,14 +213,37 @@ class Dbase:
             Amount : {amount}$
         ''')
         new_r_balance = int(r_balance) + int(amount)
-        new_s_balance = int(money[:-1]) - int(amount)
+        new_s_balance = int(money) - int(amount)
         
-
+        # Inserting and updating DB records
         self.c.execute("INSERT INTO transactions(sender_id,recipient_id,amount,description,status) VALUES(?,?,?,?,?)", (uid,r_uid,amount,mes,'succesfull',))
         self.c.execute("UPDATE bank_cards SET balance = ? WHERE user_id = ?", (new_r_balance,r_uid))
         self.c.execute("UPDATE bank_cards SET balance = ? WHERE user_id = ?", (new_s_balance,uid))
         print('Operation was successfull!!')
                        
+    def transfer_history(self,uid):
+        self.c.execute("SELECT * FROM transactions WHERE sender_id = ?", (uid,))
+        data = self.c.fetchall()
+        if data:
+            print('History of outcomes:')
+            for i in data:
+                s_name = self.get_name(i[1])
+                r_name = self.get_name(i[2])
+                print(f'Sender : {s_name} | Reciever : {r_name} | Ammount : {i[3]} | message : {i[6]} | Date : {i[4]}')
+                print('--------------------------------------------------------------------------------------')
+
+        self.c.execute("SELECT * FROM transactions WHERE recipient_id = ?", (uid,))
+        data1 = self.c.fetchall()
+        if data1:
+            print('History of Income:')
+            for i in data1:
+                s_name = self.get_name(i[1])
+                r_name = self.get_name(i[2])
+                print(f'Sender : {s_name} | Reciever : {r_name} | Ammount : {i[3]} | message : {i[6]} | Date : {i[4]}')
+                print('--------------------------------------------------------------------------------------')
+
+
+
     def close(self):
         self.conn.commit()
         self.conn.close()

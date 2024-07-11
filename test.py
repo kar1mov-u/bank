@@ -12,8 +12,9 @@ while True:
     print('3 - Display Information')
     print('4 - Add a bank card')
     print('5 - Check Balance')
-    print('6 - Log-out')
-
+    print('6 - Transfer Money')
+    print('7 - Transfer History')
+    print('8 - Logout')
     command = input()
     if command == '1':
         bnk.login()
@@ -26,6 +27,10 @@ while True:
     elif command == '5':
         bnk.balance_show()
     elif command == '6':
+        bnk.transfer_money()
+    elif command == '7':
+        bnk.transfers_history()
+    elif command == '8':
         bnk.logout()
     else:
         print('Thank you for using our BANK !!')
